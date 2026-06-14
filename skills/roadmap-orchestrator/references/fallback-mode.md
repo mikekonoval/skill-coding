@@ -42,7 +42,7 @@ command -v codex || { echo "ERROR: codex not found"; exit 1; }
 # 2. superpowers резолвится через ~/.agents/skills/
 ls ~/.agents/skills/superpowers/SKILL.md 2>/dev/null || {
   echo "ERROR: superpowers not in ~/.agents/skills/"
-  echo "Fix: ln -s ~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0 ~/.agents/skills/superpowers"
+  echo 'Fix: ln -s "$(ls -d ~/.claude/plugins/cache/claude-plugins-official/superpowers/*/ | sort -V | tail -1)" ~/.agents/skills/superpowers'
   exit 1
 }
 

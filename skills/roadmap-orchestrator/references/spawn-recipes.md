@@ -22,16 +22,15 @@ prompt: |
   Рабочая директория: [путь к проекту]
 ```
 
-Пути к SKILL.md superpowers скиллов (кэш плагина):
+Пути к SKILL.md superpowers скиллов (кэш плагина). **Версию не хардкодить** — взять последнюю установленную:
 ```bash
-# Brainstorming (для писателя спеки)
-~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/SKILL.md
+# База = последняя версия superpowers в кэше плагина (sort -V → старшая версия)
+SP=$(ls -d ~/.claude/plugins/cache/claude-plugins-official/superpowers/*/ 2>/dev/null | sort -V | tail -1)
+[ -n "$SP" ] || { echo "ERROR: superpowers не установлен в кэше плагина"; exit 1; }
 
-# Writing plans (для писателя плана)
-~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/writing-plans/SKILL.md
-
-# Subagent-driven development (для реализатора)
-~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/subagent-driven-development/SKILL.md
+"${SP}skills/brainstorming/SKILL.md"                # писатель спеки (Фаза A)
+"${SP}skills/writing-plans/SKILL.md"               # писатель плана (Фаза B)
+"${SP}skills/subagent-driven-development/SKILL.md"  # реализатор (Фаза C)
 ```
 
 Выбор модели: по рубрике → `model-routing.md`.
@@ -165,7 +164,7 @@ spawn_agent(
 ```bash
 ls ~/.agents/skills/superpowers/SKILL.md 2>/dev/null || {
   echo "ERROR: superpowers not found in ~/.agents/skills/"
-  echo "Fix: ln -s ~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0 ~/.agents/skills/superpowers"
+  echo 'Fix: ln -s "$(ls -d ~/.claude/plugins/cache/claude-plugins-official/superpowers/*/ | sort -V | tail -1)" ~/.agents/skills/superpowers'
   exit 1
 }
 ```

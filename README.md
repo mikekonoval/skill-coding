@@ -96,8 +96,8 @@ ROADMAP.md
   ```
 - `~/.agents/skills/superpowers/` должен резолвиться:
   ```bash
-  ls ~/.agents/skills/superpowers/SKILL.md 2>/dev/null || echo "Нет — создать симлинк:"
-  # ln -s ~/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0 ~/.agents/skills/superpowers
+  ls ~/.agents/skills/superpowers/SKILL.md 2>/dev/null || echo "Нет — создать симлинк на последнюю версию:"
+  # ln -s "$(ls -d ~/.claude/plugins/cache/claude-plugins-official/superpowers/*/ | sort -V | tail -1)" ~/.agents/skills/superpowers
   ```
 
 ## Установка
