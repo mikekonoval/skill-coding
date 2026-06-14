@@ -156,7 +156,7 @@ description: >
 Полная механика — в `references/review-protocol.md`.
 
 Кратко:
-1. Выбрать ревьюера: **другая модель/CLI, чем писатель** (матрица → `references/spawn-recipes.md`)
+1. Выбрать ревьюера: **другая модель/CLI, чем писатель**. Для Claude Code-оркестратора — лестница транспорта: `codex` → при исчерпании лимитов codex `opencode + deepseek-v4-pro` → честная деградация (матрица и рецепты → `references/spawn-recipes.md`)
 2. Построить нейтральный промпт по шаблону из `references/prompts/` (spec/plan/code/doc)
 3. Заспавнить ревьюера
 4. Разобрать находки по контракту (Critical/Important/Minor)

@@ -84,8 +84,10 @@
 
 | Harness оркестратора | Писатель/реализатор | Ревьюер |
 |---------------------|--------------------|----|
-| Claude Code | Claude-агент (любой ярус) | `codex exec -s read-only` |
+| Claude Code | Claude-агент (любой ярус) | `codex exec -s read-only` → при исчерпании лимитов codex: `opencode run --agent plan -m deepseek/deepseek-v4-pro` |
 | Claude Code | `codex exec` | Claude-агент (ярус 3) |
-| Codex (запасной) | Codex-агент | DeepSeek (deepcode CLI или API) |
+| Codex (запасной) | Codex-агент | DeepSeek (opencode / deepcode CLI / API) |
+
+Лестница ревьюера для Claude Code (codex → opencode+DeepSeek → честная деградация) — в `spawn-recipes.md`. DeepSeek ≠ Claude, поэтому fallback сохраняет кросс-модельность.
 
 Если ревьюер недоступен — применить правило честной деградации (→ `spawn-recipes.md`), не подменять молча.

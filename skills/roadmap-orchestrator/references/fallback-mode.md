@@ -17,14 +17,15 @@
 | | Основной режим | Запасной режим |
 |--|---|---|
 | Оркестратор | Claude Code (Fable 5) | Codex (gpt-5.5) |
-| Писатели | Claude-агенты | Codex spawn_agent |
+| Писатели (спека/план/код/**документация**) | Claude-агенты | Codex spawn_agent |
 | Ревьюер спеки/плана | `codex exec -s read-only` | DeepSeek ревьюер |
 | Ревьюер кода | `codex exec -s read-only` | DeepSeek ревьюер |
+| Ревьюер документации | `codex exec -s read-only` | DeepSeek ревьюер |
 | Фиксер | Claude-агент | Codex spawn_agent |
 
 ## Что остаётся прежним
 
-- Конвейер: roadmap → spec → plan → impl → code review
+- Конвейер: roadmap → spec → plan → impl → code review → **docs** (Фаза E — все пять фаз)
 - Гейты волн ревью (критерий остановки, кап, DISPUTED)
 - Контракт находок (Critical/Important/Minor)
 - Правило «оркестратор не пишет содержимое артефактов»
@@ -115,12 +116,26 @@ PROMPT
 
 ---
 
+## DeepSeek-ревьюер: Вариант C — opencode (рекомендуемый, проверен)
+
+Самый чистый headless-транспорт DeepSeek: ключ уже в opencode, есть read-only агент `plan`, промпт через stdin. Полный рецепт и проверка доступности — в `spawn-recipes.md` («Спавн opencode+DeepSeek-ревьюера»).
+
+```bash
+opencode run --agent plan -m deepseek/deepseek-v4-pro < /tmp/review-prompt.txt 2>&1
+```
+
+В отличие от A/B не требует отдельной настройки `~/.deepcode/settings.json` — авторизация DeepSeek живёт в opencode (`opencode auth list`).
+
+---
+
 ## Статус DeepSeek-верификации
 
-**API-ключ не настроен на 2026-06-11.** Верификация DeepSeek-ревьюера — именованный follow-up:
+**Вариант C (opencode + DeepSeek) проверен 2026-06-14:** opencode 1.15.10, DeepSeek API авторизован, `deepseek-v4-pro` через агент `plan` (read-only) возвращает находки по контракту. Это рабочий путь по умолчанию.
 
-> **Follow-up: DeepSeek smoke test**
-> Условие запуска: API-ключ настроен в `~/.deepcode/settings.json`
+Варианты A (deepcode CLI) и B (DeepSeek API напрямую) на 2026-06-11 ещё не проверены headless — именованный follow-up:
+
+> **Follow-up: DeepSeek smoke test (A/B)**
+> Условие запуска: нужен headless deepcode или прямой API вместо opencode
 > Действие: запустить рецепт вар. B с игрушечным диффом (1-2 строки), убедиться что возвращаются находки в формате контракта.
 > После проверки: обновить этот файл — отметить какой вариант (A или B) работает headless.
 

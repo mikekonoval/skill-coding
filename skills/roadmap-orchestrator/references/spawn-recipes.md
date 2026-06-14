@@ -79,7 +79,49 @@ codex exec -s read-only < /tmp/review-prompt.txt 2>&1
 
 **Ожидаемый вывод:** текст с секциями Находки / Оценка по контракту из `review-protocol.md`.
 
-**Ошибка транспорта:** ненулевой код выхода или пустой stdout → не считать как «ноль находок», применить правило деградации (см. ниже).
+**Ошибка транспорта vs. исчерпание лимитов** (разные ветки, не путать):
+- **Лимиты codex исчерпаны** — ненулевой код выхода + вывод содержит `usage limit` / `rate limit` / `quota` / `429` / `too many requests`. Это **не** ошибка транспорта: автоматически перейти на opencode+DeepSeek (см. «Лестница ревьюера» ниже), волну **не** расходовать впустую.
+- **Прочая ошибка** (пустой stdout, сетевой сбой, иной ненулевой код) → не считать как «ноль находок», применить правило честной деградации (см. ниже).
+
+---
+
+### Спавн opencode+DeepSeek-ревьюера (`opencode run`)
+
+Используется как **fallback-ревьюер** когда писатель — Claude-агент, а codex недоступен/исчерпал лимиты. DeepSeek ≠ Claude → кросс-модельность сохраняется.
+
+**Проверка доступности:**
+```bash
+command -v opencode || { echo "ERROR: opencode not found. Install: https://opencode.ai"; exit 1; }
+opencode auth list 2>/dev/null | grep -qi deepseek || { echo "ERROR: DeepSeek не авторизован в opencode. Fix: opencode auth login → DeepSeek"; exit 1; }
+```
+
+**Рецепт:**
+```bash
+# Промпт — в том же /tmp-файле, что и для codex (тот же контракт находок)
+opencode run --agent plan -m deepseek/deepseek-v4-pro < /tmp/review-prompt.txt 2>&1
+```
+
+Флаги:
+- `--agent plan` — обязательно: встроенный read-only агент opencode (read без write/edit). Аналог `-s read-only` у codex — ревьюер не изменяет репозиторий.
+- `-m deepseek/deepseek-v4-pro` — верхний ярус DeepSeek (правильно для ревью). Для спеки/плана допустим `deepseek/deepseek-reasoner`.
+- Промпт через `< /tmp/file` (stdin), как у codex — без shell-подстановки длинного текста.
+
+**Проверено локально:** opencode 1.15.10, DeepSeek API авторизован, агент `plan` read-only, рабочая директория `/Users/mikekonoval/Desktop/skill-coding`. Смоук-тест (`printf ... | opencode run --agent plan -m deepseek/deepseek-chat`) вернул ответ.
+
+**Ожидаемый вывод:** строки `→ Read ...` (чтение файлов агентом) + текст находок по контракту из `review-protocol.md`. Парсить только секции находок, строки-логи чтения игнорировать.
+
+---
+
+### Лестница ревьюера (Claude Code-оркестратор)
+
+Писатель — Claude-агент, значит ревьюер обязан быть не-Claude. Идти сверху вниз, остановиться на первом доступном:
+
+1. **codex** (`codex exec -s read-only`) — основной кросс-модельный ревьюер.
+2. **Лимиты codex исчерпаны?** (детектор выше: `usage limit`/`rate limit`/`quota`/`429`). → перейти к п.3, ту же волну продолжить на новом транспорте.
+3. **opencode+DeepSeek** (`opencode run --agent plan -m deepseek/deepseek-v4-pro`) — fallback-ревьюер. DeepSeek ≠ Claude, кросс-модельность держится.
+4. **Оба недоступны** → правило честной деградации (не подменять молча, сообщить пользователю, предложить альтернативы).
+
+Важно: это лестница **транспорта одного ревьюера** в основном режиме, а не переключение в запасной режим целиком (тот — в `fallback-mode.md`, включается только по явному сигналу пользователя при исчерпании лимитов **Claude**).
 
 ---
 
@@ -114,6 +156,7 @@ spawn_agent(
 Пути к SKILL.md superpowers для Codex-оркестратора:
 ```bash
 # Требует резолвинга ~/.agents/skills/superpowers/ (см. README)
+~/.agents/skills/superpowers/skills/brainstorming/SKILL.md
 ~/.agents/skills/superpowers/skills/writing-plans/SKILL.md
 ~/.agents/skills/superpowers/skills/subagent-driven-development/SKILL.md
 ```

@@ -75,9 +75,16 @@ ROADMAP.md
   # Проверить, что плагин активен (не стоит в false):
   cat ~/.claude/settings.json | grep -A2 superpowers
   ```
-- **codex** (codex-cli, v0.137.0+) — для кросс-модельного ревью
+- **codex** (codex-cli, v0.137.0+) — основной кросс-модельный ревьюер
   ```bash
   command -v codex && codex --version
+  ```
+
+### Рекомендуется (fallback-ревьюер при исчерпании лимитов codex)
+
+- **opencode** (v1.15+) с авторизованным DeepSeek — когда лимиты codex закончились, ревью продолжается на `opencode run --agent plan -m deepseek/deepseek-v4-pro` (DeepSeek ≠ Claude, кросс-модельность держится)
+  ```bash
+  command -v opencode && opencode auth list | grep -i deepseek
   ```
 
 ### Для запасного режима (Codex-оркестратор + DeepSeek-ревьюер)
@@ -128,8 +135,8 @@ ls -la ~/.claude/skills/roadmap-orchestrator
 Этот скилл отправляет содержимое вашего репозитория во внешние API:
 
 - **Волны ревью через `codex exec`** — уходят в OpenAI API (модели Codex/GPT)
-- **Запасной режим через DeepSeek** — уходят в DeepSeek API
-- **Каждая волна** включает диффы, спеки, планы или пути к файлам репозитория
+- **Fallback-ревьюер и запасной режим через DeepSeek** (`opencode` / deepcode / API) — уходят в DeepSeek API (серверы в КНР — учитывайте при работе с чувствительным кодом)
+- **Каждая волна** включает диффы, спеки, планы, документацию или пути к файлам репозитория
 
 **Не используйте этот скилл на репозиториях, содержащих:**
 - API-ключи, токены, пароли (даже в комментариях)
