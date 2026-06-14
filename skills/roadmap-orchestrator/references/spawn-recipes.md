@@ -31,7 +31,12 @@ SP=$(ls -d ~/.claude/plugins/cache/claude-plugins-official/superpowers/*/ 2>/dev
 "${SP}skills/brainstorming/SKILL.md"                # писатель спеки (Фаза A)
 "${SP}skills/writing-plans/SKILL.md"               # писатель плана (Фаза B)
 "${SP}skills/subagent-driven-development/SKILL.md"  # реализатор (Фаза C)
+"${SP}skills/receiving-code-review/SKILL.md"        # фиксер (любой гейт) — как принять замечания
 ```
+
+**Контракт фиксера.** Фиксеру передавать **два** пути к SKILL.md:
+1. `receiving-code-review` — всегда: как обрабатывать находки (проверка, не слепое исполнение, путь DISPUTED).
+2. SKILL.md писателя чинимого артефакта — чтобы держать формат: спека → `brainstorming`, план → `writing-plans`. Документацию фиксер чинит по образцу существующих доков (как писатель в Фазе E). Код-фиксер (Фаза D) ограничивается `receiving-code-review`.
 
 Выбор модели: по рубрике → `model-routing.md`.
 
@@ -158,6 +163,7 @@ spawn_agent(
 ~/.agents/skills/superpowers/skills/brainstorming/SKILL.md
 ~/.agents/skills/superpowers/skills/writing-plans/SKILL.md
 ~/.agents/skills/superpowers/skills/subagent-driven-development/SKILL.md
+~/.agents/skills/superpowers/skills/receiving-code-review/SKILL.md   # фиксер
 ```
 
 **Важно:** перед запуском Codex-оркестратора проверить:
